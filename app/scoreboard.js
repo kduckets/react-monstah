@@ -292,20 +292,10 @@ var Scoreboard = React.createClass({
     },
 
     componentDidMount: function() {
-        var year = this.props.date.getFullYear();
-        var month = this.props.date.getMonth() + 1;
-        var day = this.props.date.getDate();
-        $.ajax({
-            url: 'http://localhost:3000/scoreboard/' + year + '/' + month + '/' + day,
-            dataType: 'json',
-            success: function(data) {
-                var data = this.cleanData(data);
-                this.setState({scoreboard: data});
-            }.bind(this),
-            error: function(xhr, status, err) {
-                console.error(this.props.url, status, err.toString());
-            }.bind(this)
-        });
+
+        this.loadScores();
+        setInterval(this.loadScores, 10000);
+
         $.ajax({
             url: '/standings',
             dataType: 'json',
@@ -316,6 +306,22 @@ var Scoreboard = React.createClass({
                 console.error(this.props.url, status, err.toString());
             }.bind(this)
         });
+    },
+    loadScores: function(){
+      var year = this.props.date.getFullYear();
+      var month = this.props.date.getMonth() + 1;
+      var day = this.props.date.getDate();
+      $.ajax({
+          url: 'http://localhost:3000/scoreboard/' + year + '/' + month + '/' + day,
+          dataType: 'json',
+          success: function(data) {
+              var data = this.cleanData(data);
+              this.setState({scoreboard: data});
+          }.bind(this),
+          error: function(xhr, status, err) {
+              console.error(this.props.url, status, err.toString());
+          }.bind(this)
+      });
     },
 
     render: function() {
