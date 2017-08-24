@@ -47,24 +47,22 @@ app.get('/boxscore/:gid', function(req, res) {
         .catch(function(error) {console.log(error); });
 });
 
-/* TODO: move this and parse into standings table */
 app.get('/standings', function(req, resp){
-  https.get({host: 'erikberg.com',
-            path:'/mlb/standings.json',
-            headers: {'user-agent': 'MonstahBot/1.0'}}, function(response) {
-    var body = '';
-    response.on('data', function(d) {
-      body += d;
-      console.log('got here');
-      console.log(body);
-    });
-    // response.on('end', function() {
-    //   var parsed = JSON.parse(body);
-    //   console.log(parsed);
-    //   return resp.json(parsed);
-    // });
-  });
-});
+   https.get({
+     host :  'erikberg.com',
+     path : '/mlb/standings.json',
+     method : 'GET',
+     headers: {'user-agent': 'MonstahBot/1.0'}}, function(response) {
+           var body = '';
+           response.on('data', function(d) {
+             body += d;
+           });
+           response.on('end', function() {
+             var parsed = JSON.parse(body);
+             return resp.json(parsed);
+           });
+         });
+       });
 
 app.listen(app.get('port'), function() {
     console.log('MLB API broker server started: http://localhost:' + app.get('port') + '/');

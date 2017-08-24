@@ -6,8 +6,13 @@ var Route = Router.Route,
     Link = Router.Link;
 
 /*css*/
-
  var boxScore = {
+     margin: '10px',
+     borderSpacing: '0px',
+     border: '1px solid #ccc',
+ }
+ var division = {
+     position:'absolute',
      margin: '10px',
      borderSpacing: '0px',
      border: '1px solid #ccc',
@@ -33,49 +38,51 @@ var Route = Router.Route,
      borderWidth: '5px'
  }
 
+ var style = {
+     width: '65px',
+     height: '36px',
+     paddingLeft: '38px',
+     marginLeft: '4px',
+     verticalAlign: 'middle',
+     display: 'table-cell',
+     textAlign: 'left'
+ }
+ var record = {
+     fontSize: '11px',
+     fontWeight: 'normal',
+     color: '#999',
+     lineHeight: '13px'
+ }
+ var abbr = {
+     fontSize: '13px',
+     fontWeight: 'bold',
+     lineHeight: '15px'
+ }
+ var runs = {
+     fontSize: '13px',
+     fontWeight: 'bold',
+     textAlign: 'center',
+     width: '30px',
+     height: '38px',
+     background: '#e5e5e5',
+     borderTop: '1px solid #ccc',
+     borderLeft: '1px solid #ccc'
+ }
+ var count = {
+     fontSize: '13px',
+     textAlign: 'center',
+     width: '30px',
+     height: '38px',
+     borderTop: '1px solid #ccc',
+     borderLeft: '1px solid #ccc',
+ }
+ var team = {
+     borderTop: '1px solid #ccc'
+ }
+
 var TeamSummary = React.createClass({
     render: function() {
-        var style = {
-            width: '65px',
-            height: '36px',
-            paddingLeft: '38px',
-            marginLeft: '4px',
-            verticalAlign: 'middle',
-            display: 'table-cell',
-            textAlign: 'left'
-        }
-        var record = {
-            fontSize: '11px',
-            fontWeight: 'normal',
-            color: '#999',
-            lineHeight: '13px'
-        }
-        var abbr = {
-            fontSize: '13px',
-            fontWeight: 'bold',
-            lineHeight: '15px'
-        }
-        var runs = {
-            fontSize: '13px',
-            fontWeight: 'bold',
-            textAlign: 'center',
-            width: '30px',
-            height: '38px',
-            background: '#e5e5e5',
-            borderTop: '1px solid #ccc',
-            borderLeft: '1px solid #ccc'
-        }
-        var count = {
-            fontSize: '13px',
-            textAlign: 'center',
-            width: '30px',
-            height: '38px',
-            borderTop: '1px solid #ccc',
-            borderLeft: '1px solid #ccc',
-        }
-        var team = {
-            borderTop: '1px solid #ccc'
-        }
+
         return (
             <tr>
             <th style={team}>
@@ -160,7 +167,7 @@ var GameCardNL = React.createClass({
     render: function() {
 
         var game = this.props.game;
-        console.log(game);
+        // console.log(game);
         return (
             game.home_league_id === '104' &&
             <Link to='game' activeStyle={selectedBoxscore} params={{ gid: game.gameday, home: game.home_name_abbrev, away: game.away_name_abbrev }}>
@@ -209,6 +216,43 @@ var GameListNL = React.createClass({
     }
 });
 
+var Standings = React.createClass({
+
+  contextTypes: {
+      router: React.PropTypes.func
+  },
+
+ render: function (){
+   var standings = this.props.standings;
+   return (
+  <div></div>
+   );
+ }
+});
+
+var StandingsList = React.createClass({
+    contextTypes: {
+        router: React.PropTypes.func
+    },
+    render: function() {
+    var standings = this.props.standings;
+      if (standings !== null) {
+        var standingsList = standings.standing.map(function(d, idx){
+          if(d.conference === 'AL' && d.division ==='E'){
+            return (<tr><td style={count} key={idx}>{d.first_name}</td>
+                <td style={count}>{d.won}</td>
+                <td style={count}>{d.lost}</td>
+                <td style={count}>{d.games_back}</td>
+              </tr>)
+          }
+      })
+        }
+        return (
+            <table style={division}><tbody> {standingsList}</tbody> </table>
+        );
+    }
+});
+
 /* React component that represents the scoreboard card-based view. Clicking on a
  * card on the scoreboard will trigger an action to display details about the
  * selected card. */
@@ -219,7 +263,7 @@ var Scoreboard = React.createClass({
     },
 
     getInitialState: function() {
-        return {scoreboard: null};
+        return {scoreboard: null, standings:null};
     },
 
     /* Clean the data that comes back from the site */
@@ -262,13 +306,25 @@ var Scoreboard = React.createClass({
                 console.error(this.props.url, status, err.toString());
             }.bind(this)
         });
+        $.ajax({
+            url: '/standings',
+            dataType: 'json',
+            success: function(data) {
+                this.setState({standings: data});
+            }.bind(this),
+            error: function(xhr, status, err) {
+                console.error(this.props.url, status, err.toString());
+            }.bind(this)
+        });
     },
 
     render: function() {
         var scoreboard = this.state.scoreboard;
-        var games = (scoreboard === null) ? 'no' : scoreboard.game.length;
+        var standings = this.state.standings;
+        console.log('standings', standings);
         return (
             <div>
+                <StandingsList standings={standings}/>
                 <GameListNL scoreboard={scoreboard} />
                 <GameListAL scoreboard={scoreboard} />
             </div>
@@ -319,7 +375,8 @@ var headerCellStyle = {
 
 var inningTableStyle = {
     borderSpacing: '0px',
-    width:'50%'
+    width:'80%',
+    paddingLeft: '240px'
 }
 
 /* This entire section doesn't feel quite right - very verbose.
@@ -412,17 +469,6 @@ var Game = React.createClass({
             dataType: 'json',
             success: function(data) {
                 this.setState({scoreboard: data});
-            }.bind(this),
-            error: function(xhr, status, err) {
-                console.error(this.props.url, status, err.toString());
-            }.bind(this)
-        });
-        $.ajax({
-            url: '/standings',
-            dataType: 'json',
-            success: function(data) {
-                console.log(data);
-                this.setState({standings: data});
             }.bind(this),
             error: function(xhr, status, err) {
                 console.error(this.props.url, status, err.toString());
