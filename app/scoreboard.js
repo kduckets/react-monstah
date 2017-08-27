@@ -87,7 +87,7 @@ var Route = Router.Route,
  }
  var boxScoreDiv ={
    paddingLeft: '25%',
-   paddingRight:'30%'
+   paddingRight:'32%'
  }
 
 var TeamSummary = React.createClass({
