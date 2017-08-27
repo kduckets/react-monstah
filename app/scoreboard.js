@@ -441,7 +441,7 @@ var headerCellStyle = {
 var inningTableStyle = {
     borderSpacing: '0px',
     position: 'absolute',
-    width:'40%'
+    width:'35%'
 }
 
 /* This entire section doesn't feel quite right - very verbose.
