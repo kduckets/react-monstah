@@ -87,7 +87,7 @@ var Route = Router.Route,
  }
  var boxScoreDiv ={
    paddingLeft: '25%',
-   paddingRight:'32%'
+   paddingRight:'30%'
  }
 
 var TeamSummary = React.createClass({
@@ -441,7 +441,7 @@ var headerCellStyle = {
 var inningTableStyle = {
     borderSpacing: '0px',
     position: 'absolute',
-    width:'35%'
+    width:'32%'
 }
 
 /* This entire section doesn't feel quite right - very verbose.

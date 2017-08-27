@@ -20971,7 +20971,7 @@
 	var inningTableStyle = {
 	    borderSpacing: '0px',
 	    position: 'absolute',
-	    width:'35%'
+	    width:'32%'
 	}
 
 	/* This entire section doesn't feel quite right - very verbose.
