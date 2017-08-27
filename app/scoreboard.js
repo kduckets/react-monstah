@@ -13,9 +13,9 @@ var Route = Router.Route,
  }
  var division = {
      position:'absolute',
-     margin: '10px',
      borderSpacing: '0px',
      border: '1px solid #ccc',
+     width:'20%'
  }
  var status = {
      fontSize: '13px',
@@ -64,7 +64,7 @@ var Route = Router.Route,
      textAlign: 'center',
      width: '30px',
      height: '38px',
-     background: '#e5e5e5',
+    //  background: '#e5e5e5',
      borderTop: '1px solid #ccc',
      borderLeft: '1px solid #ccc'
  }
@@ -78,6 +78,16 @@ var Route = Router.Route,
  }
  var team = {
      borderTop: '1px solid #ccc'
+ }
+ var heading = {
+   textAlign: 'center',
+ }
+ var standingsBox = {
+    width:'20%'
+ }
+ var boxScoreDiv ={
+   paddingLeft: '25%',
+   paddingRight:'30%'
  }
 
 var TeamSummary = React.createClass({
@@ -239,16 +249,33 @@ var StandingsList = React.createClass({
       if (standings !== null) {
         var standingsList = standings.standing.map(function(d, idx){
           if(d.conference === 'AL' && d.division ==='E'){
-            return (<tr><td style={count} key={idx}>{d.first_name}</td>
+            //show 1/2 for games back instead of .5
+            var gamesBack = parseInt(d.games_back);
+            if(gamesBack != d.games_back){
+              var half = '1/2';
+            }
+            if(gamesBack === 0){
+              gamesBack = '-';
+            }
+            return (<tr><td style={count} key={idx}>{d.first_name.toUpperCase()}</td>
                 <td style={count}>{d.won}</td>
                 <td style={count}>{d.lost}</td>
-                <td style={count}>{d.games_back}</td>
+                <td style={count}>{gamesBack}</td>
+                {half ? <td style={count}><sup>1</sup>/<sub>2</sub></td> : <td style={count}></td>}
               </tr>)
           }
       })
         }
         return (
-            <table style={division}><tbody> {standingsList}</tbody> </table>
+          <div style={standingsBox}>
+           <p style={heading}>AL EAST</p>
+            <table style={division}>
+            <th></th>
+            <th>W</th>
+            <th>L</th>
+            <th>GB</th>
+            <tbody> {standingsList}</tbody></table>
+          </div>
         );
     }
 });
@@ -292,10 +319,8 @@ var Scoreboard = React.createClass({
     },
 
     componentDidMount: function() {
-
         this.loadScores();
         setInterval(this.loadScores, 10000);
-
         $.ajax({
             url: '/standings',
             dataType: 'json',
@@ -311,12 +336,31 @@ var Scoreboard = React.createClass({
       var year = this.props.date.getFullYear();
       var month = this.props.date.getMonth() + 1;
       var day = this.props.date.getDate();
+      var soxGid = null;
       $.ajax({
-          url: 'http://localhost:3000/scoreboard/' + year + '/' + month + '/' + day,
+          url: '/scoreboard/' + year + '/' + month + '/' + day,
           dataType: 'json',
           success: function(data) {
               var data = this.cleanData(data);
               this.setState({scoreboard: data});
+              data.game.map(function(game) {
+                  if(game.away_name_abbrev === 'BOS' || game.home_name_abbrev === 'BOS'){
+                   soxGid = game.gameday;
+                }
+              });
+              this.loadSoxGame(soxGid);
+          }.bind(this),
+          error: function(xhr, status, err) {
+              console.error(this.props.url, status, err.toString());
+          }.bind(this)
+      });
+    },
+    loadSoxGame: function(gid){
+      $.ajax({
+          url: '/boxscore/gid_' + gid,
+          dataType: 'json',
+          success: function(data) {
+              this.setState({soxboard: data});
           }.bind(this),
           error: function(xhr, status, err) {
               console.error(this.props.url, status, err.toString());
@@ -327,14 +371,30 @@ var Scoreboard = React.createClass({
     render: function() {
         var scoreboard = this.state.scoreboard;
         var standings = this.state.standings;
-        console.log('standings', standings);
+        var soxboard = this.state.soxboard;
+
+        if(soxboard){
+        var boxscore = soxboard.data.boxscore;
+        var linescore = boxscore.linescore;
+        console.log(soxboard, linescore);
         return (
             <div>
                 <StandingsList standings={standings}/>
                 <GameListNL scoreboard={scoreboard} />
                 <GameListAL scoreboard={scoreboard} />
+                <LineScore home={boxscore.home_team_code.toUpperCase()}
+                away={boxscore.away_team_code.toUpperCase()} linescore={linescore.inning_line_score} />
             </div>
         );
+      }else{
+        return(
+        <div>
+            <StandingsList standings={standings}/>
+            <GameListNL scoreboard={scoreboard} />
+            <GameListAL scoreboard={scoreboard} />
+        </div>
+      );
+      }
     }
 });
 
@@ -374,21 +434,21 @@ var inningCellStyle = {
 var headerCellStyle = {
     fontSize: '10px',
     fontWeight: 'normal',
-    color: '#666',
     padding: '2px',
     textAlign: 'center'
 }
 
 var inningTableStyle = {
     borderSpacing: '0px',
-    width:'80%',
-    paddingLeft: '240px'
+    position: 'absolute',
+    width:'40%'
 }
 
 /* This entire section doesn't feel quite right - very verbose.
  * I think I'm likely doing something wrong right now here */
 var HeaderCell = React.createClass({
-    render: function() { return (<th style={headerCellStyle}>{this.props.inning.inning}</th>); }
+    render: function() {
+    return (<th style={headerCellStyle}>{this.props.inning.inning}</th>); }
 });
 
 var HomeCell = React.createClass({
@@ -422,7 +482,7 @@ var HomeRow = React.createClass({
         </tr>);
     }
 });
-
+//this.props.innings.map
 var AwayRow = React.createClass({
     render: function() {
         return (
@@ -439,10 +499,17 @@ var AwayRow = React.createClass({
 var LineScore = React.createClass({
     render: function() {
         var linescore = this.props.linescore;
+        console.log(linescore);
+        if(linescore.length < 9){
+          for (var i = linescore.length + 1; i < 10; i+=1) {
+            linescore.push({home:'', away:'', inning:i});
+          }
+        }
         var heading = (<HeaderRow innings={linescore} />);
 
         return (
-            <div>
+            <div style={boxScoreDiv}>
+            <p style={heading}>FENWAY PARK</p>
             <table style={inningTableStyle}>
             <thead>
                 <HeaderRow innings={linescore} />
@@ -469,7 +536,7 @@ var Game = React.createClass({
     },
     /* This method is invoked via a route */
     componentWillReceiveProps: function() {
-        var gid = this.context.router.getCurrentParams().gid;
+      var gid = this.context.router.getCurrentParams().gid;
         $.ajax({
             url: '/boxscore/gid_' + gid,
             dataType: 'json',
