@@ -321,14 +321,11 @@ var Scoreboard = React.createClass({
     componentDidMount: function() {
         this.loadScores();
         setInterval(this.loadScores, 10000);
-<<<<<<< HEAD
         this.loadStandings();
         setInterval(this.loadScores, 100000);
       },
 
     loadStandings:function(){
-=======
->>>>>>> ee5aa41dd545875d4574cc9dc5c24373277087e3
         $.ajax({
             url: '/standings',
             dataType: 'json',

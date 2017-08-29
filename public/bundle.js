@@ -20707,7 +20707,7 @@
 	    render: function() {
 
 	        var game = this.props.game;
-	        // console.log(game);
+	        //console.log(game);
 	        return (
 	            game.home_league_id === '104' &&
 	            React.createElement(Link, {to: "game", activeStyle: selectedBoxscore, params: { gid: game.gameday, home: game.home_name_abbrev, away: game.away_name_abbrev}}, 
@@ -20851,6 +20851,11 @@
 	    componentDidMount: function() {
 	        this.loadScores();
 	        setInterval(this.loadScores, 10000);
+	        this.loadStandings();
+	        setInterval(this.loadScores, 100000);
+	      },
+
+	    loadStandings:function(){
 	        $.ajax({
 	            url: '/standings',
 	            dataType: 'json',
@@ -20862,6 +20867,7 @@
 	            }.bind(this)
 	        });
 	    },
+
 	    loadScores: function(){
 	      var year = this.props.date.getFullYear();
 	      var month = this.props.date.getMonth() + 1;
