@@ -87,7 +87,9 @@ var Route = Router.Route,
  }
  var boxScoreDiv ={
    paddingLeft: '25%',
-   paddingRight:'30%'
+   paddingRight:'30%',
+   position:'static',
+   width:'100%'
  }
 
 var TeamSummary = React.createClass({
@@ -247,6 +249,7 @@ var StandingsList = React.createClass({
     render: function() {
     var standings = this.props.standings;
       if (standings !== null) {
+        console.log('standings', standings);
         var standingsList = standings.standing.map(function(d, idx){
           if(d.conference === 'AL' && d.division ==='E'){
             //show 1/2 for games back instead of .5
@@ -320,9 +323,9 @@ var Scoreboard = React.createClass({
 
     componentDidMount: function() {
         this.loadScores();
-        setInterval(this.loadScores, 10000);
+        setInterval(this.loadScores, 30000);
         this.loadStandings();
-        setInterval(this.loadScores, 100000);
+        setInterval(this.loadStandings, 120000);
       },
 
     loadStandings:function(){
@@ -446,7 +449,6 @@ var headerCellStyle = {
 
 var inningTableStyle = {
     borderSpacing: '0px',
-    position: 'absolute',
     width:'32%'
 }
 
@@ -505,17 +507,20 @@ var AwayRow = React.createClass({
 var LineScore = React.createClass({
     render: function() {
         var linescore = this.props.linescore;
-        console.log(linescore);
+        console.log('home', this.props);
         if(linescore.length < 9){
           for (var i = linescore.length + 1; i < 10; i+=1) {
             linescore.push({home:'', away:'', inning:i});
           }
         }
+        var park = '';
+        this.props.home === 'BOS' ? park = 'FENWAY PARK' : park = this.props.home + ' - ' + this.props.away;
         var heading = (<HeaderRow innings={linescore} />);
 
         return (
             <div style={boxScoreDiv}>
-            <p style={heading}>FENWAY PARK</p>
+
+            <p style={heading}>{park}</p>
             <table style={inningTableStyle}>
             <thead>
                 <HeaderRow innings={linescore} />

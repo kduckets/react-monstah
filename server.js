@@ -52,7 +52,7 @@ app.get('/standings', function(req, resp){
      host :  'erikberg.com',
      path : '/mlb/standings.json',
      method : 'GET',
-     headers: {'user-agent': 'MonstahBot/1.0'}}, function(response) {
+     headers: {'user-agent': 'SoxBot/1.0/pokinjackson@gmail.com'}}, function(response) {
            var body = '';
            response.on('data', function(d) {
              body += d;
